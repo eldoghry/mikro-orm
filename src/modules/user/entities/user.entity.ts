@@ -1,6 +1,6 @@
 import { BeforeCreate, BeforeUpdate, Entity, EventArgs, PrimaryKey, Property } from '@mikro-orm/core';
 import * as crypto from 'crypto';
-import { BaseEntity } from '../../abstract/base.entity';
+import { BaseEntity } from '../../../abstract/base.entity';
 
 @Entity()
 export class User extends BaseEntity {
