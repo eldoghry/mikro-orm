@@ -30,19 +30,28 @@ export class UserService {
 
   async findOne(id: number) {
     const user = await this.findOneOrFail(id);
-    await wrap(user).populate(['bio', 'password']);
+    await wrap(user).populate(['bio', 'password']); // use wrap
     console.log(user); //password is hidden by serialization
-    return user;
+    return user; // no need to refresh entity as it become managed (inserting into db and have id) after flushing
+    // return await _em.refresh(user); // no need after flushing
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findOneOrFail(id);
     const _em = this.em.fork();
 
-    console.log(updateUserDto);
-
     _em.assign(user, updateUserDto);
     await _em.persist(user).flush();
+
+    // ! have problem with the following, doc said if I use em.findOne() no need to persist entity before flushing
+    // const _em = this.em.fork();
+    // const user = await _em.findOne(User, { id }); // ! returned one time only !! why ?
+
+    // console.log('User before Update', user);
+    // // Object.assign(user, { ...user, ...updateUserDto }); //! error on 2nd call
+    // _em.assign(user, updateUserDto); //! error on 2nd call
+    // console.log('User after Update', user);
+    // _em.flush(); //! I have to persist first to avoid errors
 
     return user;
   }
