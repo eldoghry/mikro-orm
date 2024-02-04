@@ -3,8 +3,9 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository, wrap } from '@mikro-orm/postgresql';
+import { EntityRepository, wrap } from '@mikro-orm/postgresql';
 import { User } from '../user/entities/user.entity';
+import { EntityManager } from '@mikro-orm/core';
 
 @Injectable()
 export class ArticleService {
@@ -40,40 +41,25 @@ export class ArticleService {
   // }
 
   async create(createArticleDto: CreateArticleDto) {
-    const _em = this.em.fork();
-    console.log('🚀 ~ ArticleService ~ create ~ createArticleDto:', _em._id);
-    let article: Article;
-
-    await _em.transactional(async (em) => {
-      const { authorId, ...payload } = createArticleDto;
-      article = em.create(Article, payload);
-      if (authorId) {
-        // work only one time, fail in second time
-        const userRef = em.getReference(User, authorId);
-        console.log('🚀 ~ ArticleService ~ create ~ userRef:', userRef);
-        // article.author = userRef;
-      }
-
-      await em.persistAndFlush(article);
-    });
-    // const article = new Article();
-    // wrap(article).assign(payload);
+    console.log('🚀 ~ ArticleService ~ create ~ em_id:', this.em._id);
+    const { authorId, ...payload } = createArticleDto;
+    const article = new Article();
+    wrap(article).assign(payload);
 
     // if (authorId) {
-    // // work only one time, fail in second time
-    //   const userRef = _em.getReference(User, authorId);
-    //   console.log('🚀 ~ ArticleService ~ create ~ userRef:', userRef);
+    //   const userRef = this.em.getReference(User, authorId);
     //   article.author = userRef;
     // }
 
-    // if (authorId) {
-    //   // work only one time, fail in second time
-    //   const user = await _em.findOne(User, { id: authorId });
-    //   article.author = user;
-    // }
+    if (authorId) {
+      // work only one time, fail in second time
+      const user = await this.em.findOne(User, { id: authorId });
+      // article.author = user;
+      user.articles.add(article);
+    }
+    console.log(article);
+    await this.em.persistAndFlush(article);
 
-    // await _em.persistAndFlush(article);
-    console.log('🚀 ~ ArticleService ~ create ~ article:', article);
     return article;
   }
 

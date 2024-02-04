@@ -30,8 +30,8 @@ export class Article {
   // @ManyToOne({ nullable: true })
   //   @ManyToOne(() => User)
   //   @ManyToOne('User')
-  // @ManyToOne({ entity: () => User, nullable: true, inversedBy: 'articles' })
-  // author?: User;
+  @ManyToOne({ entity: () => User, nullable: true, inversedBy: 'articles' })
+  author?: User;
 
   @BeforeCreate()
   createSlug() {
