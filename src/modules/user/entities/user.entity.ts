@@ -1,9 +1,19 @@
-import { BeforeCreate, BeforeUpdate, Entity, EventArgs, PrimaryKey, Property } from '@mikro-orm/core';
+import { BeforeCreate, BeforeUpdate, Collection, Entity, EventArgs, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
 import * as crypto from 'crypto';
 import { BaseEntity } from '../../../abstract/base.entity';
+import { Article } from '../../article/entities/article.entity';
 
 @Entity()
-export class User extends BaseEntity {
+export class User {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  createdAt = new Date();
+
+  @Property({ onUpdate: () => new Date() })
+  updatedAt = new Date();
+
   @Property()
   fullName!: string;
 
@@ -15,6 +25,9 @@ export class User extends BaseEntity {
 
   @Property({ type: 'text', lazy: true })
   bio = '';
+
+  // @OneToMany({ entity: () => Article, mappedBy: 'author' })
+  // articles = new Collection<Article>(this);
 
   @BeforeCreate()
   @BeforeUpdate()
